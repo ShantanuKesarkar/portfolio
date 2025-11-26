@@ -331,33 +331,46 @@
         @media (max-width: 768px) {
             /* Fix Typography */
             h1 { font-size: 2.5rem; }
+            h2 { font-size: 1.8rem; }
             
-            /* Fix Nav (Scrollable on mobile) */
-            .nav-links { 
-                gap: 16px; overflow-x: auto; padding-bottom: 4px;
-                -webkit-overflow-scrolling: touch; 
-            }
-            .nav-content { display: block; }
-            .logo { margin-bottom: 10px; display: block; }
-
-            /* Fix Experience Tree for Mobile */
-            .timeline-line-bg, .timeline-line-fill { left: 20px; } /* Move line to left */
-            .timeline-node { left: 20px; }
-            .timeline-row { flex-direction: column !important; align-items: flex-start; margin-left: 30px; margin-bottom: 60px; }
-            .timeline-date { width: 100%; text-align: left; padding: 0 0 10px 20px; }
-            .timeline-content { width: 100%; transform: none !important; border-left: 2px solid var(--accent); border-right: 1px solid var(--border); }
-
-            /* Fix Carousel (Stack vertically on mobile) */
-            .carousel-scene { width: 100%; height: auto; perspective: none; }
-            .carousel { position: relative; transform: none !important; display: flex; flex-direction: column; gap: 20px; }
-            .carousel-card {
-                position: relative; left: auto; top: auto; width: 100%; height: auto;
-                opacity: 1; transform: none !important;
-            }
-            .carousel-nav { display: none; } /* Hide 3D controls on mobile */
+            /* Fix Nav - Keep Horizontal but shrink */
+            .nav-links { gap: 12px; font-size: 0.8rem; }
+            .nav-links a { font-size: 0.8rem; }
+            .logo { font-size: 1rem; }
             
             /* UI Tweaks */
             .level-badge { top: auto; bottom: 20px; right: 20px; }
+
+            /* --- SCALED DOWN DESKTOP LOOK --- */
+
+            /* 1. Carousel: Scale down the whole 3D container to fit */
+            .carousel-scene {
+                transform: scale(0.65); /* Shrink to 65% size */
+                margin-top: -60px; /* Compensate for the empty space left by scaling */
+                margin-bottom: -60px;
+            }
+            .carousel-nav {
+                display: flex !important; /* Force show buttons */
+                margin-top: 10px;
+            }
+
+            /* 2. Timeline: Keep alternating structure but shrink elements */
+            .timeline-container {
+                max-width: 100%;
+                padding: 0 10px;
+            }
+            .timeline-row {
+                margin-bottom: 60px;
+            }
+            /* Force Keep Alternating layout */
+            .timeline-date { width: 40%; font-size: 0.75rem; padding: 0 10px; }
+            .timeline-content { width: 42%; padding: 16px; }
+            .exp-role { font-size: 0.9rem; }
+            .exp-company { font-size: 0.8rem; }
+            .timeline-content p { font-size: 0.8rem; display: none; } /* Hide description on mobile to fit, or keep it if text is short */
+            
+            /* Note: To make text fit, we might need to show description only on tap/hover, or just keep it small */
+            .timeline-content p { display: block; font-size: 0.7rem; line-height: 1.4; }
         }
     </style>
 </head>
@@ -405,7 +418,7 @@
             I am a Machine Learning Engineer specializing in <strong>LLMs, RAG architectures, and Computer Vision</strong>. 
             Currently engineering AI-driven media solutions at Hoopr.ai.
         </p>
-        <div style="display: flex; gap: 16px;">
+        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
             <a href="#projects" class="btn btn-primary">View Mission Logs</a>
             <a href="mailto:kesarksrshantanu@gmail.com" class="btn btn-outline">Contact</a>
         </div>
@@ -723,6 +736,16 @@
             mouse.x = null;
             mouse.y = null;
         });
+        window.addEventListener('touchmove', (e) => {
+            if(e.touches.length > 0) {
+                mouse.x = e.touches[0].clientX;
+                mouse.y = e.touches[0].clientY;
+            }
+        });
+        window.addEventListener('touchend', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
         window.addEventListener('resize', () => {
             resize();
             initParticles();
@@ -832,36 +855,36 @@
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
 
-        if(window.innerWidth > 768) {
-            let currentAngle = 0;
-            const cardCount = cards.length;
-            const theta = 360 / cardCount; 
-            const radius = Math.round((300 / 2) / Math.tan(Math.PI / cardCount)) + 60; 
+        // Always run 3D carousel logic (Mobile + Desktop)
+        // We just rely on CSS scaling to fit it on mobile
+        let currentAngle = 0;
+        const cardCount = cards.length;
+        const theta = 360 / cardCount; 
+        const radius = Math.round((300 / 2) / Math.tan(Math.PI / cardCount)) + 60; 
 
-            function setupCarousel() {
-                cards.forEach((card, index) => {
-                    const angle = theta * index;
-                    card.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
-                });
-                rotateCarousel();
-            }
-
-            function rotateCarousel() {
-                carousel.style.transform = `translateZ(-${radius}px) rotateY(${currentAngle}deg)`;
-            }
-
-            prevBtn.addEventListener('click', () => {
-                currentAngle += theta;
-                rotateCarousel();
+        function setupCarousel() {
+            cards.forEach((card, index) => {
+                const angle = theta * index;
+                card.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
             });
-
-            nextBtn.addEventListener('click', () => {
-                currentAngle -= theta;
-                rotateCarousel();
-            });
-
-            setupCarousel();
+            rotateCarousel();
         }
+
+        function rotateCarousel() {
+            carousel.style.transform = `translateZ(-${radius}px) rotateY(${currentAngle}deg)`;
+        }
+
+        prevBtn.addEventListener('click', () => {
+            currentAngle += theta;
+            rotateCarousel();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentAngle -= theta;
+            rotateCarousel();
+        });
+
+        setupCarousel();
     </script>
 </body>
 </html>
